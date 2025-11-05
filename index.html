@@ -13,10 +13,24 @@
         <p>Renseignez l'URL de votre instance Supabase et la clé API (service role ou anon) habilitée à manipuler les tables.</p>
         <form id="connection-form" class="card">
           <label for="supabaseUrl">URL Supabase</label>
-          <input id="supabaseUrl" name="supabaseUrl" type="url" placeholder="https://xyzcompany.supabase.co" required />
+          <input
+            id="supabaseUrl"
+            name="supabaseUrl"
+            type="url"
+            placeholder="https://xyzcompany.supabase.co"
+            value="https://yexnvarduablpgddxwzd.supabase.co"
+            required
+          />
 
           <label for="supabaseKey">Clé API</label>
-          <input id="supabaseKey" name="supabaseKey" type="password" placeholder="Votre clé API" required />
+          <input
+            id="supabaseKey"
+            name="supabaseKey"
+            type="password"
+            placeholder="Votre clé API"
+            value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlleG52YXJkdWFibHBnZGR4d3pkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTkyMjM0ODksImV4cCI6MjA3NDc5OTQ4OX0.auEQsFBWC0ADDYtKstakP2y-BxYWN8FvAEV8F8wk-3s"
+            required
+          />
 
           <div class="stack" style="justify-content: flex-end;">
             <button type="submit">Se connecter</button>
@@ -103,7 +117,7 @@
 
         const { data, error } = await supabase
           .from('users')
-          .select('id, username, role')
+          .select('id, username, role, trigram')
           .eq('username', username)
           .eq('password', password)
           .maybeSingle();
