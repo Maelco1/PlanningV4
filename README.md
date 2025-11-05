@@ -16,6 +16,8 @@ Ce projet fournit une interface statique (compatible GitHub Pages) pour gérer l
 2. Créez un projet Supabase et exécutez le script [`supabase_schema.sql`](./supabase_schema.sql) dans la console SQL pour créer les tables, l'administrateur initial (`admin` / `Melatonine`) et les politiques de sécurité.
 3. Récupérez l'URL Supabase (`https://votre-instance.supabase.co`) et une clé API (clé de service recommandée pour l'administration).
 4. Ouvrez `index.html`, saisissez l'URL et la clé API lorsque la fenêtre s'affiche, puis connectez-vous avec le compte `admin` / `Melatonine`.
+
+> ℹ️ **Configuration par défaut** : les fichiers fournis incluent une configuration Supabase préremplie (`https://yexnvarduablpgddxwzd.supabase.co`) avec la clé API indiquée. Vous pouvez la remplacer à tout moment via le bouton « Changer d'instance ».
 5. Depuis l'espace administrateur, créez les comptes pour les médecins et remplaçants.
 
 > ℹ️ **Sécurité** : le script SQL fournit des politiques permissives pour simplifier les tests. Adaptez-les pour vos besoins (politiques spécifiques par rôle, restrictions sur les colonnes, etc.). Pour un usage public, préférez utiliser une clé de service côté serveur.
