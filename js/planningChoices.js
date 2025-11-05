@@ -40,6 +40,50 @@ const createEmptyState = (nature) => {
   return container;
 };
 
+const toDate = (value) => {
+  if (!value) {
+    return null;
+  }
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+  return date;
+};
+
+const getDayLabel = (choice) => {
+  if (typeof choice?.planning_day_label === 'string' && choice.planning_day_label.trim()) {
+    return choice.planning_day_label.trim();
+  }
+  return formatDate(choice?.day);
+};
+
+const groupChoicesByDay = (choices) => {
+  const sorted = [...choices].sort((a, b) => {
+    const dateA = toDate(a?.day);
+    const dateB = toDate(b?.day);
+    if (dateA && dateB) {
+      return dateA.getTime() - dateB.getTime();
+    }
+    if (dateA) {
+      return -1;
+    }
+    if (dateB) {
+      return 1;
+    }
+    return getDayLabel(a).localeCompare(getDayLabel(b), 'fr');
+  });
+  const byDay = new Map();
+  sorted.forEach((choice) => {
+    const label = getDayLabel(choice);
+    if (!byDay.has(label)) {
+      byDay.set(label, []);
+    }
+    byDay.get(label).push(choice);
+  });
+  return byDay;
+};
+
 const renderBoard = (choices) => {
   const board = document.querySelector('#planning-tables');
   if (!board) {
@@ -50,20 +94,83 @@ const renderBoard = (choices) => {
     board.appendChild(createEmptyState('normale'));
     return;
   }
-  const list = document.createElement('ul');
-  list.className = 'planning-choice-list';
-  choices.forEach((choice) => {
-    const item = document.createElement('li');
-    item.className = 'planning-choice-item';
-    item.innerHTML = `
-      <strong>${formatDate(choice.day)} — Colonne ${choice.column_number}</strong>
-      <span>${choice.column_label ?? 'Créneau'}</span>
-      <span>Qualité : ${choice.guard_nature === 'bonne' ? 'Bonne garde' : 'Garde normale'}</span>
-      <span>État : ${choice.etat ?? 'en attente'}</span>
-    `;
-    list.appendChild(item);
+
+  const grouped = groupChoicesByDay(choices);
+  const table = document.createElement('table');
+  table.className = 'planning-choice-table';
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th scope="col">Jour</th>
+      <th scope="col">Colonne</th>
+      <th scope="col">Créneau</th>
+      <th scope="col">Nature</th>
+      <th scope="col">État</th>
+    </tr>
+  `;
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  grouped.forEach((dayChoices, dayLabel) => {
+    const sortedChoices = [...dayChoices].sort((a, b) => {
+      const columnA = Number.parseInt(a?.column_number, 10);
+      const columnB = Number.parseInt(b?.column_number, 10);
+      if (Number.isFinite(columnA) && Number.isFinite(columnB)) {
+        return columnA - columnB;
+      }
+      if (Number.isFinite(columnA)) {
+        return -1;
+      }
+      if (Number.isFinite(columnB)) {
+        return 1;
+      }
+      return (a?.column_label ?? '').localeCompare(b?.column_label ?? '', 'fr');
+    });
+
+    sortedChoices.forEach((choice, index) => {
+      const row = document.createElement('tr');
+      if (index === 0) {
+        const dayCell = document.createElement('th');
+        dayCell.className = 'planning-choice-day';
+        dayCell.scope = 'rowgroup';
+        dayCell.rowSpan = sortedChoices.length;
+        dayCell.textContent = dayLabel;
+        row.appendChild(dayCell);
+      }
+
+      const columnCell = document.createElement('td');
+      columnCell.className = 'planning-choice-column';
+      columnCell.textContent = `Col. ${choice.column_number ?? '—'}`;
+      row.appendChild(columnCell);
+
+      const slotCell = document.createElement('td');
+      slotCell.className = 'planning-choice-slot';
+      slotCell.textContent = choice.column_label ?? 'Créneau';
+      row.appendChild(slotCell);
+
+      const natureCell = document.createElement('td');
+      const isBonne = choice.guard_nature === 'bonne';
+      const natureBadge = document.createElement('span');
+      natureBadge.className = `planning-choice-badge planning-choice-badge--${isBonne ? 'bonne' : 'normale'}`;
+      natureBadge.textContent = isBonne ? 'Bonne garde' : 'Garde normale';
+      natureCell.appendChild(natureBadge);
+      row.appendChild(natureCell);
+
+      const statusCell = document.createElement('td');
+      const status = typeof choice.etat === 'string' && choice.etat.trim() ? choice.etat.trim() : 'en attente';
+      const statusBadge = document.createElement('span');
+      statusBadge.className = 'planning-choice-status';
+      statusBadge.textContent = status;
+      statusCell.appendChild(statusBadge);
+      row.appendChild(statusCell);
+
+      tbody.appendChild(row);
+    });
   });
-  board.appendChild(list);
+
+  table.appendChild(tbody);
+  board.appendChild(table);
 };
 
 const renderSummary = (choices) => {
