@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Espace Médecin - Gestion des gardes</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="connection-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <section class="modal">
+        <h1>Connexion à Supabase</h1>
+        <p>Indiquez vos paramètres Supabase pour enregistrer vos gardes.</p>
+        <form id="connection-form" class="card">
+          <label for="supabaseUrl">URL Supabase</label>
+          <input id="supabaseUrl" name="supabaseUrl" type="url" required />
+
+          <label for="supabaseKey">Clé API</label>
+          <input id="supabaseKey" name="supabaseKey" type="password" required />
+
+          <div class="stack" style="justify-content: flex-end;">
+            <button type="submit">Se connecter</button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <main>
+      <section class="card planning-entry">
+        <header class="planning-entry-header">
+          <div>
+            <h1>Espace Médecin</h1>
+            <p>Priorisez vos gardes en trois étapes.</p>
+          </div>
+          <nav>
+            <button id="disconnect" class="secondary" type="button">Changer d'instance</button>
+            <button id="logout" class="secondary" type="button">Se déconnecter</button>
+          </nav>
+        </header>
+
+        <nav class="stepper" aria-label="Progression des étapes">
+          <button type="button" class="stepper-step is-active" data-step="1">
+            <span class="stepper-index">1</span>
+            <span class="stepper-label">Gardes normales</span>
+          </button>
+          <button type="button" class="stepper-step" data-step="2">
+            <span class="stepper-index">2</span>
+            <span class="stepper-label">Bonnes gardes</span>
+          </button>
+          <button type="button" class="stepper-step" data-step="3">
+            <span class="stepper-index">3</span>
+            <span class="stepper-label">Récapitulatif</span>
+          </button>
+        </nav>
+
+        <section class="step-pane is-active" data-step-pane="1">
+          <header class="step-pane-header">
+            <h2>Étape 1 — Gardes normales</h2>
+            <p>Sélectionnez vos créneaux prioritaires. Seules les cases ouvertes en garde normale sont cliquables.</p>
+          </header>
+          <div class="planning-host" data-step-host="1">
+            <section class="planning-section planning-step-section" data-planning-section>
+              <div class="planning-surface">
+                <div class="section-header planning-section-header">
+                  <h3 id="planning-title">Planning des gardes</h3>
+                  <p id="planning-feedback" role="status"></p>
+                </div>
+                <div class="planning-layout">
+                  <div class="planning-board" id="planning-board" role="region" aria-labelledby="planning-title">
+                    <div class="planning-tables" id="planning-tables" aria-live="polite"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+          <footer class="step-pane-footer">
+            <button type="button" class="step-nav" data-action="next">Étape suivante</button>
+          </footer>
+        </section>
+
+        <section class="step-pane" data-step-pane="2">
+          <header class="step-pane-header">
+            <h2>Étape 2 — Bonnes gardes</h2>
+            <p>Ajoutez des créneaux en bonne garde. Seules les cases ouvertes en bonne garde sont cliquables.</p>
+          </header>
+          <div class="planning-host" data-step-host="2"></div>
+          <footer class="step-pane-footer">
+            <div class="step-actions">
+              <button type="button" class="step-nav secondary" data-action="previous">Étape précédente</button>
+              <button type="button" class="step-nav" data-action="next">Étape suivante</button>
+            </div>
+          </footer>
+        </section>
+
+        <section class="step-pane" data-step-pane="3">
+          <header class="step-pane-header">
+            <h2>Étape 3 — Récapitulatif</h2>
+            <p>Réordonnez vos choix puis enregistrez-les dans la base de données.</p>
+          </header>
+          <div class="summary-card" aria-live="polite">
+            <div class="summary-header">
+              <h3>Vos créneaux sélectionnés</h3>
+              <p id="summary-feedback"></p>
+            </div>
+            <div class="summary-columns">
+              <section class="summary-column">
+                <h4 class="summary-column-title">Gardes normales</h4>
+                <ul class="summary-list" data-summary-nature="normale"></ul>
+              </section>
+              <section class="summary-column">
+                <h4 class="summary-column-title">Bonnes gardes</h4>
+                <ul class="summary-list" data-summary-nature="bonne"></ul>
+              </section>
+            </div>
+          </div>
+          <footer class="step-pane-footer">
+            <div class="step-actions">
+              <button type="button" class="step-nav secondary" data-action="previous">Étape précédente</button>
+              <button type="button" id="save-choices" class="step-nav">Enregistrer</button>
+            </div>
+            <p id="save-feedback" role="status"></p>
+          </footer>
+        </section>
+      </section>
+    </main>
+    <script type="module">
+      import {
+        initializeConnectionModal,
+        requireRole,
+        getCurrentUser,
+        setCurrentUser
+      } from './js/supabaseClient.js';
+      import { initializePlanningChoices } from './js/planningChoices.js';
+
+      const user = getCurrentUser();
+      if (!user) {
+        window.location.replace('index.html');
+      }
+      requireRole('medecin');
+
+      initializeConnectionModal();
+
+      document.querySelector('#logout').addEventListener('click', () => {
+        setCurrentUser(null);
+        window.location.replace('index.html');
+      });
+
+      initializePlanningChoices({ userRole: 'medecin' });
+    </script>
+  </body>
+</html>

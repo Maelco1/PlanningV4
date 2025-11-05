@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Traitement des demandes - Administration</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="connection-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <section class="modal">
+        <h1>Connexion à Supabase</h1>
+        <p>Pour gérer les demandes, configurez l'accès à votre instance Supabase.</p>
+        <form id="connection-form" class="card">
+          <label for="supabaseUrl">URL Supabase</label>
+          <input id="supabaseUrl" name="supabaseUrl" type="url" required />
+
+          <label for="supabaseKey">Clé API</label>
+          <input id="supabaseKey" name="supabaseKey" type="password" required />
+
+          <div class="stack" style="justify-content: flex-end;">
+            <button type="submit">Se connecter</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <main>
+      <section class="card admin-shell requests-shell">
+        <header>
+          <div>
+            <h1>Traitement des demandes</h1>
+            <p>Validez ou refusez les demandes de garde reçues.</p>
+          </div>
+          <nav>
+            <button id="back-to-admin" class="secondary" type="button">Retour à l'administration</button>
+            <button id="disconnect" class="secondary" type="button">Changer d'instance</button>
+            <button id="logout" class="secondary" type="button">Se déconnecter</button>
+          </nav>
+        </header>
+
+        <section class="request-controls" aria-label="Filtres et onglets">
+          <nav
+            id="request-user-tabs"
+            class="request-tabs request-user-tabs"
+            role="tablist"
+            aria-label="Type de compte"
+          >
+            <button
+              type="button"
+              class="request-tab"
+              data-user-type-tab="medecin"
+              role="tab"
+              aria-controls="requests-table"
+              aria-selected="false"
+            >
+              Médecins
+            </button>
+            <button
+              type="button"
+              class="request-tab"
+              data-user-type-tab="remplacant"
+              role="tab"
+              aria-controls="requests-table"
+              aria-selected="false"
+            >
+              Remplaçants
+            </button>
+          </nav>
+
+          <nav id="request-tabs" class="request-tabs" role="tablist" aria-label="Statut des demandes"></nav>
+
+          <form id="request-filters" class="request-filters" aria-label="Filtres des demandes">
+            <div class="request-filter-field">
+              <label for="filter-date">Date</label>
+              <input id="filter-date" name="date" type="date" />
+            </div>
+
+            <div class="request-filter-field">
+              <label for="filter-type">Type</label>
+              <select id="filter-type" name="type">
+                <option value="">Tous les types</option>
+                <option value="visite">Visite</option>
+                <option value="consultation">Consultation</option>
+                <option value="téléconsultation">Téléconsultation</option>
+              </select>
+            </div>
+
+            <div class="request-filter-field">
+              <label for="filter-doctor">Utilisateur</label>
+              <input
+                id="filter-doctor"
+                name="doctor"
+                type="text"
+                inputmode="text"
+                autocomplete="off"
+                placeholder="Trigramme"
+              />
+            </div>
+
+            <div class="request-filter-field">
+              <label for="filter-column">Colonne</label>
+              <input id="filter-column" name="column" type="text" inputmode="text" autocomplete="off" placeholder="Libellé ou code" />
+            </div>
+
+            <div class="request-filter-field">
+              <label for="filter-status">Statut</label>
+              <select id="filter-status" name="status">
+                <option value="">Tous</option>
+                <option value="en attente">En attente</option>
+                <option value="validé">Acceptées</option>
+                <option value="refusé">Refusées</option>
+              </select>
+            </div>
+
+            <div class="request-filter-actions">
+              <button type="reset" class="subtle-button">Réinitialiser</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="requests-table-section" aria-labelledby="requests-table-title">
+          <div class="section-header">
+            <h2 id="requests-table-title">Demandes</h2>
+            <p id="request-feedback" role="status"></p>
+          </div>
+
+          <div class="table-container">
+            <table id="requests-table" class="table requests-table">
+              <thead>
+                <tr>
+                  <th scope="col" data-column="date">Date de la garde</th>
+                  <th scope="col" data-column="columnLabel">Intitulé de colonne</th>
+                  <th scope="col" data-column="columnNumber">N° de colonne</th>
+                  <th scope="col" data-column="type">Type</th>
+                  <th scope="col" data-column="hours">Horaires</th>
+                  <th scope="col" data-column="user">Utilisateur</th>
+                  <th scope="col" data-column="priority">Index de priorité</th>
+                  <th scope="col" data-column="quality">Qualité</th>
+                  <th scope="col" data-column="status">Statut</th>
+                  <th scope="col" data-column="created">Créée le</th>
+                  <th scope="col" data-column="actions">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="requests-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./js/requestProcessing.js"></script>
+  </body>
+</html>

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestion des gardes - Connexion</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div id="connection-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true">
+      <section class="modal">
+        <h1>Connexion à Supabase</h1>
+        <p>Renseignez l'URL de votre instance Supabase et la clé API (service role ou anon) habilitée à manipuler les tables.</p>
+        <form id="connection-form" class="card">
+          <label for="supabaseUrl">URL Supabase</label>
+          <input id="supabaseUrl" name="supabaseUrl" type="url" placeholder="https://xyzcompany.supabase.co" required />
+
+          <label for="supabaseKey">Clé API</label>
+          <input id="supabaseKey" name="supabaseKey" type="password" placeholder="Votre clé API" required />
+
+          <div class="stack" style="justify-content: flex-end;">
+            <button type="submit">Se connecter</button>
+          </div>
+        </form>
+      </section>
+    </div>
+    <main>
+      <section class="card">
+        <header>
+          <h1>Gestion des gardes</h1>
+          <nav>
+            <a href="https://supabase.com/docs" target="_blank" rel="noreferrer">Documentation Supabase</a>
+          </nav>
+        </header>
+        <p>Merci de vous authentifier pour accéder à votre espace.</p>
+        <form id="login-form">
+          <label for="username">Identifiant</label>
+          <input id="username" name="username" type="text" autocomplete="username" placeholder="Votre identifiant" required />
+
+          <label for="password">Mot de passe</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" placeholder="Votre mot de passe" required />
+
+          <button type="submit">Se connecter</button>
+          <p id="login-feedback" role="status"></p>
+        </form>
+      </section>
+    </main>
+    <script type="module">
+      import {
+        initializeConnectionModal,
+        getSupabaseClient,
+        onSupabaseReady,
+        setCurrentUser,
+        getCurrentUser,
+        normalizeRole
+      } from './js/supabaseClient.js';
+
+      initializeConnectionModal();
+
+      const feedback = document.querySelector('#login-feedback');
+      const form = document.querySelector('#login-form');
+
+      const redirectAfterLogin = (user) => {
+        if (!user) {
+          return;
+        }
+        const destinations = {
+          administrateur: 'admin.html',
+          medecin: 'medecin.html',
+          remplacant: 'remplacant.html'
+        };
+        const normalizedRole = normalizeRole(user.role);
+        const target = destinations[normalizedRole];
+        if (target) {
+          window.location.assign(target);
+        } else {
+          const label = typeof user.role === 'string' && user.role.trim() ? user.role.trim() : 'inconnu';
+          feedback.textContent = `Rôle inconnu: ${label}`;
+        }
+      };
+
+      const existingUser = getCurrentUser();
+      if (existingUser) {
+        redirectAfterLogin(existingUser);
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        feedback.textContent = '';
+        form.querySelector('button[type="submit"]').disabled = true;
+
+        await onSupabaseReady();
+        const supabase = getSupabaseClient();
+        if (!supabase) {
+          feedback.textContent = 'Veuillez configurer la connexion à Supabase.';
+          form.querySelector('button[type="submit"]').disabled = false;
+          return;
+        }
+
+        const formData = new FormData(form);
+        const username = formData.get('username').trim();
+        const password = formData.get('password').trim();
+
+        const { data, error } = await supabase
+          .from('users')
+          .select('id, username, role')
+          .eq('username', username)
+          .eq('password', password)
+          .maybeSingle();
+
+        form.querySelector('button[type="submit"]').disabled = false;
+
+        if (error) {
+          console.error(error);
+          feedback.textContent = 'Impossible de vérifier vos identifiants. Vérifiez la configuration Supabase.';
+          return;
+        }
+
+        if (!data) {
+          feedback.textContent = 'Identifiant ou mot de passe invalide.';
+          return;
+        }
+
+        const normalizedUser = setCurrentUser(data) ?? data;
+        redirectAfterLogin(normalizedUser);
+      });
+    </script>
+  </body>
+</html>
