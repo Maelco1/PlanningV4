@@ -275,6 +275,96 @@ textarea {
   gap: 0.35rem;
 }
 
+.planning-choice-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface);
+  margin-top: 1rem;
+}
+
+.planning-choice-table thead th {
+  background: var(--surface-alt);
+  text-align: left;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.planning-choice-table th,
+.planning-choice-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+  vertical-align: top;
+}
+
+.planning-choice-table tbody tr:last-child th,
+.planning-choice-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.planning-choice-table tbody tr:nth-child(even) {
+  background: rgba(148, 163, 184, 0.05);
+}
+
+.planning-choice-day {
+  min-width: 220px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text);
+  background: rgba(14, 165, 233, 0.08);
+  border-right: 1px solid rgba(15, 23, 42, 0.06);
+}
+
+.planning-choice-column {
+  font-weight: 600;
+}
+
+.planning-choice-slot {
+  color: var(--muted);
+}
+
+.planning-choice-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.planning-choice-badge--normale {
+  background: rgba(14, 165, 233, 0.16);
+  color: var(--accent);
+}
+
+.planning-choice-badge--bonne {
+  background: rgba(16, 185, 129, 0.18);
+  color: var(--success);
+}
+
+.planning-choice-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.18);
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
 .summary-list {
   list-style: none;
   padding: 0;
